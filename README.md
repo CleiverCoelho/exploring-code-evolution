@@ -81,9 +81,49 @@ Seja criativo!
 
 Responda às questões abaixo diretamente neste arquivo `README.md` do seu fork:
 
-1. Repositório selecionado: <URL_DO_REPOSITORIO_SELECIONADO_AQUI>
-2. Gráfico selecionado: <IMAGEM_DO_GRAFICO_SELECIONADO_AQUI>
-3. Explicação: <EXPLICACAO_AQUI>
+1. Repositório selecionado: https://github.com/psf/requests
+
+   Relatório gerado: [`report_requests.html`](report_requests.html) (dados brutos em [`report_requests.csv`](report_requests.csv)).
+   Comando utilizado (com histórico desde 2012, para capturar mais da evolução do projeto):
+
+   ```
+   $ gitevo -r python -f 2012 https://github.com/psf/requests
+   ```
+
+2. Gráfico selecionado: **Lines of code (LOC)**
+
+   ![Evolução de LOC do psf/requests](images/loc_requests.png)
+
+3. Explicação:
+
+   O gráfico mostra o total de linhas de código Python do repositório `requests`, uma das bibliotecas HTTP mais usadas em Python, em um snapshot por ano (o GitEvo usa o último commit antes do início de cada ano; então o ponto "2017" é o estado do código no fim de 2016).
+   A curva tem três fases bem claras.
+
+   **Fase 1: crescimento (2012–2016, 5.833 → 19.637 LOC).**
+   O projeto cresce rápido no começo (mais que dobra entre 2012 e 2013) e depois desacelera.
+   Só que boa parte desse código não era do `requests`: o projeto fazia *vendoring* das suas dependências, ou seja, guardava uma cópia do `urllib3` e do `chardet` dentro de `requests/packages/`.
+   Assim, o LOC acompanhava o crescimento dessas bibliotecas, e não só o do próprio `requests`.
+
+   **Fase 2: o pico (2017, 32.897 LOC).**
+   De um ano para o outro o LOC aumenta cerca de 13 mil linhas e o número de arquivos `.py` vai de 84 para 106.
+   Segundo o histórico do Git, isso não foi uma funcionalidade nova: em 14/10/2016 entrou o commit *"Vendor idna v2.1"*, que copiou também a biblioteca `idna` para dentro de `requests/packages/`.
+   Só o arquivo `idna/uts46data.py` (uma tabela Unicode gerada automaticamente) tem cerca de 180 KB.
+   O gráfico *Data structures* do mesmo relatório confirma isso: o número de tuplas pula de 439 para **9.037** e depois volta para 471.
+   No fim de 2016, 76 dos arquivos Python do repositório (38 do `chardet`, 30 do `urllib3`, 7 do `idna` e mais 1) eram código de terceiros.
+
+   **Fase 3: a queda e a estabilidade (2018–2026, ~9,5 mil → 11,3 mil LOC).**
+   Em maio de 2017 saiu a versão **2.16.0**, cuja única entrada no `HISTORY` é *"Unvendor ALL the things!"*.
+   As cópias embutidas foram removidas, e `urllib3`, `chardet` e `idna` passaram a ser dependências normais, instaladas pelo `pip`.
+   O LOC cai cerca de 71% (32.897 → 9.477) e os arquivos vão de 106 para 35.
+   Para manter compatibilidade com quem importava `requests.packages.urllib3`, ficou só um *shim* pequeno (`requests/packages.py`).
+   Desde então a curva é quase plana, com crescimento de cerca de 1,9% ao ano, o que combina com um projeto maduro, que hoje está mais em manutenção do que ganhando funcionalidades novas.
+   Nesse período os aumentos vêm de melhorias pontuais e de testes (os arquivos de teste passam de 1 para 7 em 2017 e chegam a 10 em 2025), e não de funcionalidades novas.
+
+   **Boas práticas.**
+   A queda no gráfico é uma melhoria e não perda de código.
+   Copiar dependências para dentro do projeto dificulta atualizações de segurança (um bug no `urllib3` exigia uma nova versão do `requests`), gera conflitos com distribuições Linux que proíbem código duplicado e infla métricas como o LOC.
+   Depois do *unvendoring*, o LOC passou a medir só o código que o time do `requests` mantém de fato.
+   O gráfico também mostra um cuidado ao usar métricas de tamanho: sem olhar o histórico, alguém poderia achar que o projeto perdeu dois terços do código em 2017, quando o código próprio continuou praticamente o mesmo.
 
 
 
